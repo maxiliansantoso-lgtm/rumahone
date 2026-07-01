@@ -212,14 +212,18 @@ export const db = {
         const list = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const userProfile = this.getUserProfile();
         
+        if (!userProfile) {
+            throw new Error("Unauthorized: You must create an account first to publish listings.");
+        }
+        
         // Use user's profile as the agent info if logged in
-        const agentInfo = userProfile ? {
+        const agentInfo = {
             id: 'user-agent-active',
             name: userProfile.name,
             phone: userProfile.phone,
             avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop',
             agency: userProfile.agency || 'SatuRumah Agen'
-        } : AGENTS[0];
+        };
 
         const newListing = {
             id: `listing-${Date.now()}`,

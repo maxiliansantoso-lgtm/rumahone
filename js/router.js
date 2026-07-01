@@ -1,7 +1,8 @@
 // js/router.js - ES6 Router implementation
 
-import { renderHeader } from './components/header.js?v=4';
+import { renderHeader, showToast } from './components/header.js?v=4';
 import { renderFooter } from './components/footer.js?v=4';
+import { db } from './db.js?v=4';
 import { renderHome } from './pages/home.js?v=4';
 import { renderSearch } from './pages/search.js?v=4';
 import { renderProperty } from './pages/property.js?v=4';
@@ -58,7 +59,12 @@ function router() {
             renderSearch(appContainer, { favoritesOnly: 'true' });
             break;
         case 'add-property':
-            renderAddProperty(appContainer);
+            if (!db.getUserProfile()) {
+                window.location.hash = '#profile';
+                setTimeout(() => showToast('Silakan buat akun agen terlebih dahulu untuk memasang iklan properti'), 100);
+            } else {
+                renderAddProperty(appContainer);
+            }
             break;
         case 'profile':
             renderProfile(appContainer);
