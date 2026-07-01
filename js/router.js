@@ -6,6 +6,7 @@ import { renderHome } from './pages/home.js?v=4';
 import { renderSearch } from './pages/search.js?v=4';
 import { renderProperty } from './pages/property.js?v=4';
 import { renderAddProperty } from './pages/add-property.js?v=4';
+import { renderProfile } from './pages/profile.js?v=4';
 
 // Simple URL Hash parser helper
 // E.g., "#search?transaction_type=sale&city=Jakarta"
@@ -58,6 +59,9 @@ function router() {
             break;
         case 'add-property':
             renderAddProperty(appContainer);
+            break;
+        case 'profile':
+            renderProfile(appContainer);
             break;
         default:
             appContainer.innerHTML = `

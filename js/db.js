@@ -210,13 +210,24 @@ export const db = {
     addProperty(data) {
         initDatabase();
         const list = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const userProfile = this.getUserProfile();
+        
+        // Use user's profile as the agent info if logged in
+        const agentInfo = userProfile ? {
+            id: 'user-agent-active',
+            name: userProfile.name,
+            phone: userProfile.phone,
+            avatar: userProfile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop',
+            agency: userProfile.agency || 'SatuRumah Agen'
+        } : AGENTS[0];
+
         const newListing = {
             id: `listing-${Date.now()}`,
             created_at: new Date().toISOString(),
             is_verified: false,
             is_featured: false,
             is_user_created: true, // Identify as user-created listing
-            agent: AGENTS[0], // default agent for simplicity
+            agent: agentInfo,
             images: [
                 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop'
             ],
@@ -234,10 +245,10 @@ export const db = {
         const index = list.findIndex(item => item.id === id);
         if (index !== -1) {
             const property = list[index];
-            const isTimestampId = parseInt(id.replace('listing-', '')) > 1000000000000;
             
-            // Only allow taking down listings that are user-created
-            if (property.is_user_created || isTimestampId) {
+            // STRICT check: ONLY allow taking down if property is explicitly user_created.
+            // Example seeded listings (which lack is_user_created) cannot be deleted.
+            if (property.is_user_created === true) {
                 list.splice(index, 1);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
                 
@@ -253,6 +264,22 @@ export const db = {
             }
         }
         return false;
+    },
+
+    // User Profile API
+    getUserProfile() {
+        const profile = localStorage.getItem('rumahst_profile');
+        return profile ? JSON.parse(profile) : null;
+    },
+
+    saveUserProfile(profile) {
+        localStorage.setItem('rumahst_profile', JSON.stringify(profile));
+        window.dispatchEvent(new CustomEvent('profileUpdated'));
+    },
+
+    logout() {
+        localStorage.removeItem('rumahst_profile');
+        window.dispatchEvent(new CustomEvent('profileUpdated'));
     },
 
     // Bookmark/Favorites control

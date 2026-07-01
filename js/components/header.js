@@ -6,6 +6,27 @@ export function renderHeader() {
     const container = document.getElementById('header-mount');
     if (!container) return;
 
+    const profile = db.getUserProfile();
+    let navActionsHtml = `
+        <a href="#add-property" class="btn btn-outline" id="btn-add-property" style="display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--color-primary); color: var(--color-primary); font-weight: 600; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s;">
+            <i class="fa-solid fa-circle-plus"></i> Pasang Iklan
+        </a>
+    `;
+
+    if (profile) {
+        navActionsHtml += `
+            <a href="#profile" class="nav-profile-link" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm); transition: background 0.2s;">
+                <img src="${profile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-primary);">
+                <span>${profile.name}</span>
+            </a>
+        `;
+    } else {
+        navActionsHtml += `
+            <a href="#profile" class="btn btn-outline" style="text-decoration: none; display: flex; align-items: center; justify-content: center; height: 38px;">Masuk</a>
+            <a href="#profile" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; height: 38px;">Daftar</a>
+        `;
+    }
+
     container.innerHTML = `
         <header class="main-header">
             <div class="container header-container">
@@ -26,11 +47,7 @@ export function renderHeader() {
                     </ul>
                 </nav>
                 <div class="nav-actions">
-                    <a href="#add-property" class="btn btn-outline" id="btn-add-property" style="display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--color-primary); color: var(--color-primary); font-weight: 600; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s;">
-                        <i class="fa-solid fa-circle-plus"></i> Pasang Iklan
-                    </a>
-                    <button class="btn btn-outline" id="btn-login">Masuk</button>
-                    <button class="btn btn-primary" id="btn-register">Daftar Agen</button>
+                    ${navActionsHtml}
                 </div>
             </div>
         </header>
@@ -68,16 +85,12 @@ export function renderHeader() {
     window.addEventListener('hashchange', updateActiveNav);
     window.addEventListener('favoritesUpdated', updateFavCount);
     
+    // Bind profile updates to refresh header dynamically
+    window.removeEventListener('profileUpdated', renderHeader);
+    window.addEventListener('profileUpdated', renderHeader);
+    
     updateActiveNav();
     updateFavCount();
-
-    // Event listeners for auth demo
-    document.getElementById('btn-login')?.addEventListener('click', () => {
-        showToast('Form masuk disimulasikan');
-    });
-    document.getElementById('btn-register')?.addEventListener('click', () => {
-        showToast('Pendaftaran agen disimulasikan');
-    });
 }
 
 // Global utility for showing toast notifications
