@@ -2,7 +2,7 @@
 
 import { renderHeader, showToast } from './components/header.js?v=5';
 import { renderFooter } from './components/footer.js?v=5';
-import { db } from './db.js?v=5';
+import { db, syncFromCloud } from './db.js?v=5';
 import { renderHome } from './pages/home.js?v=5';
 import { renderSearch } from './pages/search.js?v=5';
 import { renderProperty } from './pages/property.js?v=5';
@@ -38,6 +38,9 @@ function router() {
 
     // Reset view container scroll
     window.scrollTo(0, 0);
+
+    // Sync data from cloud DB asynchronously on page navigation
+    syncFromCloud();
 
     const { route, params } = parseHash(window.location.hash);
 

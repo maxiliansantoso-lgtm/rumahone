@@ -1,6 +1,6 @@
 // js/db.js - SatuRumah Database Layer with Seed Data
 
-const CLOUD_DB_URL = 'https://jsonblob.com/api/jsonBlob/1388450123533426688';
+const CLOUD_DB_URL = 'https://jsonblob.com/api/jsonBlob/019f1d3a-def4-7242-8cab-99f9ce9e2c99';
 const STORAGE_KEY = 'rumahst_db';
 const FAVORITES_KEY = 'rumahst_favs';
 const INQUIRIES_KEY = 'rumahst_inqs';
@@ -188,9 +188,6 @@ export function initDatabase() {
     if (!localStorage.getItem(INQUIRIES_KEY)) {
         localStorage.setItem(INQUIRIES_KEY, JSON.stringify([]));
     }
-    
-    // Background sync user-created listings from the global Cloud DB bin
-    syncFromCloud();
 }
 
 // Database query API
