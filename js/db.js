@@ -215,6 +215,7 @@ export const db = {
             created_at: new Date().toISOString(),
             is_verified: false,
             is_featured: false,
+            is_user_created: true, // Identify as user-created listing
             agent: AGENTS[0], // default agent for simplicity
             images: [
                 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop'
@@ -232,18 +233,24 @@ export const db = {
         let list = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const index = list.findIndex(item => item.id === id);
         if (index !== -1) {
-            list.splice(index, 1);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            const property = list[index];
+            const isTimestampId = parseInt(id.replace('listing-', '')) > 1000000000000;
             
-            // Clean up from favorites
-            let favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-            const favIndex = favs.indexOf(id);
-            if (favIndex !== -1) {
-                favs.splice(favIndex, 1);
-                localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
-                window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+            // Only allow taking down listings that are user-created
+            if (property.is_user_created || isTimestampId) {
+                list.splice(index, 1);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                
+                // Clean up from favorites
+                let favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+                const favIndex = favs.indexOf(id);
+                if (favIndex !== -1) {
+                    favs.splice(favIndex, 1);
+                    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+                    window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+                }
+                return true;
             }
-            return true;
         }
         return false;
     },

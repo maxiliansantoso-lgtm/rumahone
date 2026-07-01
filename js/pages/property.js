@@ -246,6 +246,7 @@ export function renderProperty(container, propertyId) {
                         </button>
 
                         <!-- Take Down Button (Owner/Admin Actions) -->
+                        ${(property.is_user_created || (parseInt(property.id.replace('listing-', '')) > 1000000000000)) ? `
                         <div style="margin-top: 20px; padding-top: 20px; border-top: 1.5px dashed var(--border-color);">
                             <span style="display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Aksi Pemilik (Owner)</span>
                             <button class="agent-cta-btn" id="pdp-takedown-btn" style="background-color: #dc3545; color: white; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; cursor: pointer; width: 100%; padding: 12px; border-radius: var(--radius-sm);">
@@ -253,6 +254,7 @@ export function renderProperty(container, propertyId) {
                                 <span>Turunkan Iklan (Take Down)</span>
                             </button>
                         </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
