@@ -84,6 +84,19 @@ export function renderHome(container) {
             <div class="featured-grid" id="featured-projects-mount"></div>
         </section>
 
+        <!-- Latest Listings Section -->
+        <section class="section-padding container" style="border-top: 1px solid var(--border-color); padding-top: 48px;">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Listing Properti Terbaru</h2>
+                    <p style="color: var(--text-secondary); margin-top: 4px; font-weight: 500;">Rumah dan properti terbaru yang baru saja ditayangkan oleh para agen kami</p>
+                </div>
+                <a href="#search?sort=latest" class="section-link">Lihat Semua <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="featured-grid" id="latest-listings-mount"></div>
+        </section>
+
         <!-- Regional Cities Section -->
         <section class="section-padding" style="background-color: var(--bg-card); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
             <div class="container">
@@ -279,6 +292,66 @@ export function renderHome(container) {
 
     // Bind favorite buttons
     featuredMount.querySelectorAll('.card-favorite-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const isFav = db.toggleFavorite(id);
+            btn.classList.toggle('active', isFav);
+            showToast(isFav ? 'Properti disimpan ke favorit' : 'Properti dihapus dari favorit');
+        });
+    });
+
+    // 4.1. Render Latest Listings
+    const latestMount = container.querySelector('#latest-listings-mount');
+    const latestListings = db.getProperties({ sort: 'latest' }).slice(0, 3);
+
+    latestMount.innerHTML = latestListings.map(item => {
+        const estInstallment = Math.round((item.price * 0.8) * 0.0075); 
+        return `
+            <div class="property-card" data-id="${item.id}">
+                <div class="card-img-wrapper">
+                    <img src="${item.images[0]}" class="card-img" alt="${item.title}">
+                    <div class="card-badge" style="background-color: var(--color-primary); color: white;">
+                        <i class="fa-solid fa-clock"></i> Baru Rilis
+                    </div>
+                    <button class="card-favorite-btn ${db.isFavorite(item.id) ? 'active' : ''}" data-id="${item.id}">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div class="card-price-row">
+                        <div class="card-price">${formatRupiah(item.price)}</div>
+                        <div class="card-price-est">~ ${formatRupiah(estInstallment)}/bln</div>
+                    </div>
+                    <h3 class="card-title">${item.title}</h3>
+                    <p class="card-address"><i class="fa-solid fa-location-dot"></i> ${item.address}</p>
+                    
+                    <!-- Micro-Badges for Proximity and Flood Safety -->
+                    <div class="card-micro-badges">
+                        ${item.is_flood_free ? `<span class="micro-badge flood-free"><i class="fa-solid fa-circle-check text-green"></i> Aman Banjir</span>` : ''}
+                        ${item.transit_distance ? `<span class="micro-badge commute-close"><i class="fa-solid fa-train text-blue"></i> ${item.transit_distance} mnt ke MRT</span>` : ''}
+                    </div>
+
+                    <div class="card-specs">
+                        ${item.bedrooms ? `<span class="spec-item"><i class="fa-solid fa-bed"></i> ${item.bedrooms} KT</span>` : ''}
+                        ${item.bathrooms ? `<span class="spec-item"><i class="fa-solid fa-bath"></i> ${item.bathrooms} KM</span>` : ''}
+                        ${item.building_size ? `<span class="spec-item"><i class="fa-solid fa-ruler-combined"></i> ${item.building_size}m²</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Bind card detail navigation clicks for latest listings
+    latestMount.querySelectorAll('.property-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-favorite-btn')) return;
+            window.location.hash = `#property?id=${card.dataset.id}`;
+        });
+    });
+
+    // Bind favorite buttons for latest listings
+    latestMount.querySelectorAll('.card-favorite-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = btn.dataset.id;
