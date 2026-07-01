@@ -1,6 +1,6 @@
 // js/pages/search.js - Search Results Page split screen with Leaflet Map
 
-import { db, formatRupiah } from '../db.js?v=4';
+import { db, formatRupiah } from '../db.js?v=5';
 
 let srpMap = null;
 let srpMarkers = {};

@@ -1,13 +1,13 @@
 // js/router.js - ES6 Router implementation
 
-import { renderHeader, showToast } from './components/header.js?v=4';
-import { renderFooter } from './components/footer.js?v=4';
-import { db } from './db.js?v=4';
-import { renderHome } from './pages/home.js?v=4';
-import { renderSearch } from './pages/search.js?v=4';
-import { renderProperty } from './pages/property.js?v=4';
-import { renderAddProperty } from './pages/add-property.js?v=4';
-import { renderProfile } from './pages/profile.js?v=4';
+import { renderHeader, showToast } from './components/header.js?v=5';
+import { renderFooter } from './components/footer.js?v=5';
+import { db } from './db.js?v=5';
+import { renderHome } from './pages/home.js?v=5';
+import { renderSearch } from './pages/search.js?v=5';
+import { renderProperty } from './pages/property.js?v=5';
+import { renderAddProperty } from './pages/add-property.js?v=5';
+import { renderProfile } from './pages/profile.js?v=5';
 
 // Simple URL Hash parser helper
 // E.g., "#search?transaction_type=sale&city=Jakarta"

@@ -1,6 +1,6 @@
 // js/pages/home.js - Homepage rendering and interactions
 
-import { db, formatRupiah } from '../db.js?v=4';
+import { db, formatRupiah } from '../db.js?v=5';
 
 export function renderHome(container) {
     let currentTab = 'sale'; // 'sale' | 'rent' | 'new-launch'

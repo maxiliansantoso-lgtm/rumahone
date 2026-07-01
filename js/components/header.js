@@ -1,6 +1,6 @@
 // js/components/header.js - Navigation Header component
 
-import { db } from '../db.js?v=4';
+import { db } from '../db.js?v=5';
 
 export function renderHeader() {
     const container = document.getElementById('header-mount');

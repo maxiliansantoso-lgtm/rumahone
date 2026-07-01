@@ -1,5 +1,5 @@
 // js/pages/add-property.js - Render and handle the List Property page
-import { db } from '../db.js?v=4';
+import { db } from '../db.js?v=5';
 
 export function renderAddProperty(container) {
     const cities = ['Jakarta Selatan', 'Jakarta Barat', 'Tangerang', 'Bandung', 'Surabaya', 'Depok'];

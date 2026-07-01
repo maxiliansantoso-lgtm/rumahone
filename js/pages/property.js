@@ -1,6 +1,6 @@
 // js/pages/property.js - Property Detail Page (PDP) rendering and logic
 
-import { db, formatRupiah } from '../db.js?v=4';
+import { db, formatRupiah } from '../db.js?v=5';
 
 export function renderProperty(container, propertyId) {
     const property = db.getPropertyById(propertyId);

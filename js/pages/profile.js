@@ -1,6 +1,6 @@
 // js/pages/profile.js - Profile management and owner listings page
-import { db, formatRupiah } from '../db.js?v=4';
-import { showToast } from '../components/header.js?v=4';
+import { db, formatRupiah } from '../db.js?v=5';
+import { showToast } from '../components/header.js?v=5';
 
 export function renderProfile(container) {
     const profile = db.getUserProfile();
