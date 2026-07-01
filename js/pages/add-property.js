@@ -141,13 +141,7 @@ export function renderAddProperty(container) {
                             </div>
                             <div class="form-group">
                                 <label style="display: block; font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">Daya Listrik (VA)</label>
-                                <select id="prop-electricity" class="form-input" style="width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 15px;">
-                                    <option value="1300">1300 VA</option>
-                                    <option value="2200">2200 VA</option>
-                                    <option value="3500">3500 VA</option>
-                                    <option value="4400">4400 VA</option>
-                                    <option value="6600">6600 VA</option>
-                                </select>
+                                <input type="number" id="prop-electricity" class="form-input" placeholder="Contoh: 1300" style="width: 100%; padding: 12px; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-size: 15px;">
                             </div>
                         </div>
 

@@ -226,6 +226,28 @@ export const db = {
         return newListing;
     },
 
+    // Delete/Take down listing
+    deleteProperty(id) {
+        initDatabase();
+        let list = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const index = list.findIndex(item => item.id === id);
+        if (index !== -1) {
+            list.splice(index, 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            
+            // Clean up from favorites
+            let favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+            const favIndex = favs.indexOf(id);
+            if (favIndex !== -1) {
+                favs.splice(favIndex, 1);
+                localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+                window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+            }
+            return true;
+        }
+        return false;
+    },
+
     // Bookmark/Favorites control
     getFavorites() {
         initDatabase();

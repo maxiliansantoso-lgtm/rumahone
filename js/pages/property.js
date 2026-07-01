@@ -244,6 +244,15 @@ export function renderProperty(container, propertyId) {
                             <i class="fa-solid fa-phone" style="font-size: 14px;"></i>
                             <span>Tampilkan Telepon</span>
                         </button>
+
+                        <!-- Take Down Button (Owner/Admin Actions) -->
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1.5px dashed var(--border-color);">
+                            <span style="display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Aksi Pemilik (Owner)</span>
+                            <button class="agent-cta-btn" id="pdp-takedown-btn" style="background-color: #dc3545; color: white; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; cursor: pointer; width: 100%; padding: 12px; border-radius: var(--radius-sm);">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Turunkan Iklan (Take Down)</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -414,6 +423,24 @@ export function renderProperty(container, propertyId) {
         phoneBtn.querySelector('span').textContent = '+' + phone;
         showToast('Nomor telepon agen ditampilkan');
     });
+
+    // Take Down button handler (Owner Actions)
+    const takedownBtn = container.querySelector('#pdp-takedown-btn');
+    if (takedownBtn) {
+        takedownBtn.addEventListener('click', () => {
+            if (confirm('Apakah Anda yakin ingin menurunkan (menghapus) iklan properti ini dari SatuRumah?')) {
+                const deleted = db.deleteProperty(property.id);
+                if (deleted) {
+                    showToast('Iklan properti berhasil diturunkan!');
+                    setTimeout(() => {
+                        window.location.hash = '#search';
+                    }, 1200);
+                } else {
+                    showToast('Gagal menurunkan iklan properti');
+                }
+            }
+        });
+    }
 
     // 4. Email Inquiry Dialog Modal
     const inqModal = container.querySelector('#inquiry-modal');
