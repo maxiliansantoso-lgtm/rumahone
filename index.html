@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatuRumah - Portal Properti Terpercaya &amp; Terverifikasi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+    <!-- Main Navigation Mount -->
+    <div id="header-mount"></div>
+
+    <!-- Application SPA Container -->
+    <main id="app"></main>
+
+    <!-- Main Footer Mount -->
+    <div id="footer-mount"></div>
+
+    <!-- Toast Notification Mount -->
+    <div id="toast-mount" class="toast-container"></div>
+
+    <!-- Leaflet JS for Map (Needs to load before scripts) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- ES6 Application Root Router -->
+    <script type="module" src="./js/router.js?v=2"></script>
+</body>
+</html>
