@@ -1,5 +1,49 @@
 // js/db.js - SatuRumah Database Layer with Seed Data
 
+const CLOUD_DB_URL = 'https://jsonblob.com/api/jsonBlob/1388450123533426688';
+const STORAGE_KEY = 'rumahst_db';
+const FAVORITES_KEY = 'rumahst_favs';
+const INQUIRIES_KEY = 'rumahst_inqs';
+
+async function uploadToCloud(userCreatedListings) {
+    try {
+        await fetch(CLOUD_DB_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userCreatedListings)
+        });
+    } catch (err) {
+        console.error("Failed to upload to Cloud DB:", err);
+    }
+}
+
+export async function syncFromCloud() {
+    try {
+        const response = await fetch(CLOUD_DB_URL);
+        if (response.ok) {
+            const cloudListings = await response.json();
+            if (Array.isArray(cloudListings)) {
+                let localList = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                
+                // Retain only seeded properties locally
+                const seeded = localList.filter(item => item.is_user_created !== true);
+                
+                // Merge cloud properties with seeded ones
+                const merged = [...cloudListings, ...seeded];
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+                
+                // Dispatch event so active pages refresh their lists
+                window.dispatchEvent(new CustomEvent('databaseSynced'));
+            }
+        }
+    } catch (err) {
+        console.error("Cloud DB sync failed:", err);
+    }
+}
+
 const CITIES = ['Jakarta Selatan', 'Jakarta Barat', 'Tangerang', 'Bandung', 'Surabaya', 'Depok'];
 
 const COORDINATES = {
@@ -132,9 +176,6 @@ function generateSeedListings() {
 }
 
 // Read/Write database state in localStorage
-const STORAGE_KEY = 'rumahst_db';
-const FAVORITES_KEY = 'rumahst_favs';
-const INQUIRIES_KEY = 'rumahst_inqs';
 
 export function initDatabase() {
     if (!localStorage.getItem(STORAGE_KEY)) {
@@ -147,6 +188,9 @@ export function initDatabase() {
     if (!localStorage.getItem(INQUIRIES_KEY)) {
         localStorage.setItem(INQUIRIES_KEY, JSON.stringify([]));
     }
+    
+    // Background sync user-created listings from the global Cloud DB bin
+    syncFromCloud();
 }
 
 // Database query API
@@ -207,9 +251,9 @@ export const db = {
     },
 
     // Add new listing (CRUD)
-    addProperty(data) {
+    async addProperty(data) {
         initDatabase();
-        const list = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         const userProfile = this.getUserProfile();
         
         if (!userProfile) {
@@ -237,13 +281,37 @@ export const db = {
             ],
             ...data
         };
-        list.unshift(newListing);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+        // 1. Fetch latest listings from Cloud DB to avoid overwriting other users' listings
+        let cloudUserListings = [];
+        try {
+            const response = await fetch(CLOUD_DB_URL);
+            if (response.ok) {
+                const fetched = await response.json();
+                if (Array.isArray(fetched)) {
+                    cloudUserListings = fetched;
+                }
+            }
+        } catch (e) {
+            console.error("Could not fetch cloud data before writing:", e);
+        }
+
+        // 2. Append new listing to cloud list
+        cloudUserListings.unshift(newListing);
+
+        // 3. Upload updated list to Cloud DB
+        await uploadToCloud(cloudUserListings);
+
+        // 4. Update local storage with the merged listings
+        const seeded = list.filter(item => item.is_user_created !== true);
+        const merged = [...cloudUserListings, ...seeded];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+
         return newListing;
     },
 
     // Delete/Take down listing
-    deleteProperty(id) {
+    async deleteProperty(id) {
         initDatabase();
         let list = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const index = list.findIndex(item => item.id === id);
@@ -251,10 +319,31 @@ export const db = {
             const property = list[index];
             
             // STRICT check: ONLY allow taking down if property is explicitly user_created.
-            // Example seeded listings (which lack is_user_created) cannot be deleted.
             if (property.is_user_created === true) {
-                list.splice(index, 1);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                // 1. Fetch latest from Cloud DB
+                let cloudUserListings = [];
+                try {
+                    const response = await fetch(CLOUD_DB_URL);
+                    if (response.ok) {
+                        const fetched = await response.json();
+                        if (Array.isArray(fetched)) {
+                            cloudUserListings = fetched;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Could not fetch cloud data before deleting:", e);
+                }
+
+                // 2. Filter out the deleted listing
+                cloudUserListings = cloudUserListings.filter(item => item.id !== id);
+
+                // 3. Upload updated list to Cloud DB
+                await uploadToCloud(cloudUserListings);
+
+                // 4. Update local storage
+                const seeded = list.filter(item => item.is_user_created !== true);
+                const merged = [...cloudUserListings, ...seeded];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
                 
                 // Clean up from favorites
                 let favs = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];

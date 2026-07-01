@@ -455,4 +455,13 @@ export function renderSearch(container, params = {}) {
         updateListings();
         if (srpMap) plotMarkers(getFilteredData());
     });
+
+    // Listen for database sync completion (for concurrent updates by other users)
+    const handleDbSync = () => {
+        if (document.getElementById('srp-listings-mount')) {
+            updateListings();
+            if (srpMap) plotMarkers(getFilteredData());
+        }
+    };
+    window.addEventListener('databaseSynced', handleDbSync);
 }

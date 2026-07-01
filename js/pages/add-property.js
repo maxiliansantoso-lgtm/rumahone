@@ -405,7 +405,7 @@ export function renderAddProperty(container) {
 
     // 4. Form Submit handler
     const form = container.querySelector('#add-property-form');
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const type = typeSelect.value;
@@ -438,13 +438,18 @@ export function renderAddProperty(container) {
             images: finalImages
         };
 
-        // Save listing using existing database layer
-        const newProperty = db.addProperty(propertyData);
+        try {
+            // Save listing using existing database layer (async)
+            const newProperty = await db.addProperty(propertyData);
 
-        // Show toast and redirect to detail page
-        showToast('Iklan properti berhasil ditayangkan!');
-        setTimeout(() => {
-            window.location.hash = `#property?id=${newProperty.id}`;
-        }, 1000);
+            // Show toast and redirect to detail page
+            showToast('Iklan properti berhasil ditayangkan!');
+            setTimeout(() => {
+                window.location.hash = `#property?id=${newProperty.id}`;
+            }, 1000);
+        } catch (err) {
+            console.error(err);
+            showToast('Gagal menayangkan iklan properti.');
+        }
     });
 }

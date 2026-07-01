@@ -429,9 +429,9 @@ export function renderProperty(container, propertyId) {
     // Take Down button handler (Owner Actions)
     const takedownBtn = container.querySelector('#pdp-takedown-btn');
     if (takedownBtn) {
-        takedownBtn.addEventListener('click', () => {
+        takedownBtn.addEventListener('click', async () => {
             if (confirm('Apakah Anda yakin ingin menurunkan (menghapus) iklan properti ini dari SatuRumah?')) {
-                const deleted = db.deleteProperty(property.id);
+                const deleted = await db.deleteProperty(property.id);
                 if (deleted) {
                     showToast('Iklan properti berhasil diturunkan!');
                     setTimeout(() => {

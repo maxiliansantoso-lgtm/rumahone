@@ -218,10 +218,10 @@ function renderProfileDetails(container, profile) {
 
     // Profile take down actions
     container.querySelectorAll('.btn-takedown-profile').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const propId = btn.getAttribute('data-id');
             if (confirm('Apakah Anda yakin ingin menurunkan iklan properti ini dari SatuRumah?')) {
-                const deleted = db.deleteProperty(propId);
+                const deleted = await db.deleteProperty(propId);
                 if (deleted) {
                     showToast('Iklan properti berhasil diturunkan!');
                     renderProfile(container); // Re-render profile list
