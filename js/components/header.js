@@ -17,7 +17,6 @@ export function renderHeader() {
                     <ul class="nav-links">
                         <li><a href="#search?transaction_type=sale" class="nav-link" id="nav-buy">Beli</a></li>
                         <li><a href="#search?transaction_type=rent" class="nav-link" id="nav-rent">Sewa</a></li>
-                        <li><a href="#search?type=apartment" class="nav-link" id="nav-projects">Apartemen</a></li>
                         <li>
                             <a href="#favorites" class="nav-link" id="nav-favs" style="display: flex; align-items: center; gap: 6px;">
                                 <i class="fa-regular fa-heart"></i> Favorit 
@@ -61,8 +60,6 @@ export function renderHeader() {
             document.getElementById('nav-buy')?.classList.add('active');
         } else if (hash.includes('transaction_type=rent')) {
             document.getElementById('nav-rent')?.classList.add('active');
-        } else if (hash.includes('type=apartment')) {
-            document.getElementById('nav-projects')?.classList.add('active');
         } else if (hash === '#favorites') {
             document.getElementById('nav-favs')?.classList.add('active');
         }

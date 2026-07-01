@@ -181,24 +181,42 @@ export function renderAddProperty(container) {
                     </div>
                 </div>
 
-                <!-- Section 4: Photo Selection -->
+                <!-- Section 4: Photo Selection & Upload -->
                 <div class="form-section">
                     <h3 class="form-section-title" style="font-size: 18px; font-weight: 800; border-bottom: 2px solid var(--color-primary-light); padding-bottom: 8px; margin-bottom: 20px; color: var(--color-primary);">4. Foto Properti</h3>
                     
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
-                        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">
-                            Pilih set foto mockup premium di bawah ini sesuai jenis properti Anda (untuk simulasi visual):
-                        </p>
-                        
-                        <div id="photo-preview-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                            <!-- Dynamic preview photos will render here based on selected type -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Drag and Drop Upload Zone -->
+                        <div id="upload-zone" style="border: 2.5px dashed var(--border-color); border-radius: var(--radius-md); padding: 32px 20px; text-align: center; background: rgba(0, 0, 0, 0.01); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 36px; color: var(--color-primary); opacity: 0.8;"></i>
+                            <div>
+                                <p style="font-weight: 700; color: var(--text-primary); margin: 0; font-size: 15px;">Unggah Foto Properti Anda</p>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">Seret & taruh file gambar di sini atau klik untuk memilih</p>
+                            </div>
+                            <input type="file" id="prop-images" multiple accept="image/*" style="display: none;">
+                            <span style="font-size: 11px; color: var(--text-muted);">Format JPG, PNG (maksimal 5 foto, masing-masing maks 2MB)</span>
+                        </div>
+
+                        <!-- Uploaded Preview Grid -->
+                        <div id="uploaded-preview-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                            <!-- Uploaded image cards with delete button will render here -->
+                        </div>
+
+                        <!-- Fallback / Preset Options if no custom photos uploaded -->
+                        <div id="preset-container">
+                            <p style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">
+                                Atau gunakan set foto mockup premium default:
+                            </p>
+                            <div id="photo-preview-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; opacity: 0.85;">
+                                <!-- Dynamic preview photos will render here based on selected type -->
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary" style="padding: 16px; font-size: 16px; font-weight: 700; border-radius: var(--radius-md); box-shadow: 0 4px 14px var(--color-primary-glow); margin-top: 12px;">
-                    <i class="fa-solid fa-cloud-arrow-up" style="margin-right: 8px;"></i> Tayangkan Iklan Properti Sekarang
+                    <i class="fa-solid fa-house-circle-check" style="margin-right: 8px;"></i> Tayangkan Iklan Properti Sekarang
                 </button>
             </form>
         </div>
@@ -225,7 +243,142 @@ export function renderAddProperty(container) {
         }
     });
 
-    // 2. Dynamic photo preview grid based on type
+    // Image resizing utility helper
+    function resizeAndCompressImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    const MAX_SIZE = 1000;
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height = Math.round((height * MAX_SIZE) / width);
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width = Math.round((width * MAX_SIZE) / height);
+                            height = MAX_SIZE;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = event.target.result;
+            };
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 2. Image upload area functionality
+    const uploadZone = container.querySelector('#upload-zone');
+    const fileInput = container.querySelector('#prop-images');
+    const uploadedGrid = container.querySelector('#uploaded-preview-grid');
+    const presetContainer = container.querySelector('#preset-container');
+    let uploadedImages = []; // Array of Base64 strings
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.style.borderColor = 'var(--color-primary)';
+        uploadZone.style.background = 'rgba(0, 0, 0, 0.03)';
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.style.borderColor = 'var(--border-color)';
+        uploadZone.style.background = 'rgba(0, 0, 0, 0.01)';
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.style.borderColor = 'var(--border-color)';
+        uploadZone.style.background = 'rgba(0, 0, 0, 0.01)';
+        if (e.dataTransfer.files) {
+            handleFiles(e.dataTransfer.files);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files) {
+            handleFiles(e.target.files);
+        }
+    });
+
+    const handleFiles = async (files) => {
+        const remainingSlots = 5 - uploadedImages.length;
+        if (remainingSlots <= 0) {
+            showToast('Maksimal 5 foto diperbolehkan');
+            return;
+        }
+
+        const filesToProcess = Array.from(files)
+            .filter(file => file.type.startsWith('image/'))
+            .slice(0, remainingSlots);
+
+        if (filesToProcess.length === 0) return;
+
+        showToast(`Memproses ${filesToProcess.length} foto...`);
+
+        for (const file of filesToProcess) {
+            try {
+                const compressedBase64 = await resizeAndCompressImage(file);
+                uploadedImages.push(compressedBase64);
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal memuat beberapa foto');
+            }
+        }
+
+        updateUploadedPreviews();
+    };
+
+    const updateUploadedPreviews = () => {
+        if (uploadedImages.length > 0) {
+            presetContainer.style.display = 'none';
+            uploadedGrid.innerHTML = uploadedImages.map((img, idx) => `
+                <div style="position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 4/3; border: 2.5px solid ${idx === 0 ? 'var(--color-primary)' : 'var(--border-color)'};">
+                    <img src="${img}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="btn-delete-img" data-index="${idx}" style="position: absolute; top: 4px; right: 4px; background: rgba(220, 53, 69, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; transition: all 0.2s;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    ${idx === 0 ? `
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: var(--color-primary); color: white; text-align: center; font-size: 11px; font-weight: 700; padding: 2px 0;">
+                            Foto Utama
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            uploadedGrid.querySelectorAll('.btn-delete-img').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.getAttribute('data-index'));
+                    uploadedImages.splice(idx, 1);
+                    updateUploadedPreviews();
+                });
+            });
+        } else {
+            presetContainer.style.display = 'block';
+            uploadedGrid.innerHTML = '';
+        }
+    };
+
+    // 3. Dynamic photo preview grid based on type
     const typeSelect = container.querySelector('#prop-type');
     const photoGrid = container.querySelector('#photo-preview-grid');
     const roomFieldsRow = container.querySelector('#room-fields-row');
@@ -256,7 +409,7 @@ export function renderAddProperty(container) {
     typeSelect.addEventListener('change', updatePreviews);
     updatePreviews(); // initial render
 
-    // 3. Form Submit handler
+    // 4. Form Submit handler
     const form = container.querySelector('#add-property-form');
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -264,6 +417,8 @@ export function renderAddProperty(container) {
         const type = typeSelect.value;
         const selectedCity = container.querySelector('#prop-city').value;
         const cityCenter = coordinates[selectedCity] || { lat: -6.2088, lng: 106.8456 };
+
+        const finalImages = uploadedImages.length > 0 ? uploadedImages : (presetImages[type] || presetImages['house']);
 
         const propertyData = {
             title: container.querySelector('#prop-title').value,
@@ -282,11 +437,11 @@ export function renderAddProperty(container) {
             furnishing: container.querySelector('#prop-furnishing').value,
             address: container.querySelector('#prop-address').value,
             city: selectedCity,
-            lat: cityCenter.lat + (Math.random() - 0.5) * 0.01, // small offset from city center
+            lat: cityCenter.lat + (Math.random() - 0.5) * 0.01,
             lng: cityCenter.lng + (Math.random() - 0.5) * 0.01,
             is_flood_free: true,
             transit_distance: Math.floor(Math.random() * 12) + 3,
-            images: presetImages[type] || presetImages['house']
+            images: finalImages
         };
 
         // Save listing using existing database layer
